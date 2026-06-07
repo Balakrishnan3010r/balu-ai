@@ -13,7 +13,10 @@ const nodemailer = require("nodemailer");
 const app = express();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-app.use(cors());
+app.use(cors({
+    origin: ["https://balu-ai.onrender.com", "http://localhost:3000"],
+    credentials: true
+}));
 app.use(express.json({ limit: "20mb" }));
 app.use(express.static(path.join(__dirname, "../frontend")));
 
