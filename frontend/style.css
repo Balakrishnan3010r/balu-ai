@@ -1,82 +1,287 @@
 /* ── Mobile Responsive ── */
 @media (max-width: 768px) {
 
-    /* Hide sidebar by default on mobile */
+    body {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+    }
+
+    /* ── Sidebar ── */
     .sidebar {
         position: fixed;
-        left: -260px;
+        left: -280px;
         top: 0;
         height: 100vh;
+        width: 280px;
         z-index: 1000;
-        transition: left 0.3s ease;
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: none;
     }
 
     .sidebar.open {
         left: 0;
+        box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4);
     }
 
-    /* Overlay behind sidebar */
+    /* ── Overlay ── */
     .sidebar-overlay {
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.6);
         z-index: 999;
+        backdrop-filter: blur(2px);
+        transition: opacity 0.3s;
     }
 
     .sidebar-overlay.show {
         display: block;
     }
 
-    /* Main takes full width */
+    /* ── Main layout ── */
     .main {
         width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
     }
 
-    /* Hamburger menu button */
+    /* ── Topbar ── */
+    .topbar {
+        padding: 0 16px;
+        height: 56px;
+        min-height: 56px;
+        border-bottom: 1px solid var(--border, #1a1a1a);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg-primary, #0f0f0f);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    /* ── Hamburger ── */
     .hamburger {
         display: flex !important;
+        flex-direction: column;
+        gap: 5px;
+        padding: 8px;
+        border-radius: 10px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
     }
 
-    /* Message padding smaller on mobile */
+    .hamburger span {
+        width: 20px;
+        height: 2px;
+        background: #888;
+        border-radius: 2px;
+        transition: all 0.3s;
+    }
+
+    .hamburger:hover span {
+        background: #fff;
+    }
+
+    /* Model badge on mobile */
+    .model-badge {
+        font-size: 11px;
+        padding: 3px 10px;
+    }
+
+    /* ── Chat messages ── */
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 0;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ── Message rows ── */
     .message-row {
-        padding: 10px 4%;
+        padding: 6px 16px;
+        gap: 10px;
     }
 
-    /* Bubble max width bigger on mobile */
+    .message-row.user {
+        padding: 6px 16px;
+    }
+
+    /* ── Avatars ── */
+    .avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+
+    /* ── Bubbles ── */
     .bubble {
-        max-width: 85%;
-        font-size: 14px;
-    }
-
-    /* Input area */
-    .input-wrapper {
-        padding: 10px 4%;
-    }
-
-    /* Topbar */
-    .topbar {
+        max-width: 82%;
         padding: 10px 14px;
+        font-size: 14px;
+        line-height: 1.6;
+        border-radius: 18px;
     }
 
-    /* Welcome screen */
+    .user-bubble {
+        border-bottom-right-radius: 4px;
+    }
+
+    .bot-bubble {
+        border-bottom-left-radius: 4px;
+    }
+
+    /* ── Welcome screen ── */
     .welcome {
-        padding: 20px;
-        min-height: 50vh;
+        padding: 32px 24px;
+        min-height: auto;
+        gap: 10px;
+    }
+
+    .welcome-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 28px;
+        border-radius: 16px;
     }
 
     .welcome h1 {
         font-size: 20px;
+        letter-spacing: -0.3px;
+    }
+
+    .welcome p {
+        font-size: 14px;
     }
 
     .suggestion-chips {
-        gap: 6px;
+        gap: 8px;
+        margin-top: 12px;
     }
 
     .chip {
         font-size: 12px;
-        padding: 6px 12px;
+        padding: 8px 14px;
+        border-radius: 20px;
+    }
+
+    /* ── Input area ── */
+    .input-wrapper {
+        padding: 10px 12px;
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+        background: var(--bg-primary, #0f0f0f);
+        border-top: 1px solid var(--border, #1a1a1a);
+        position: sticky;
+        bottom: 0;
+    }
+
+    .input-box {
+        border-radius: 24px;
+        padding: 8px 8px 8px 14px;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .input-box textarea {
+        font-size: 15px;
+        max-height: 100px;
+        padding: 4px 0;
+    }
+
+    .input-box button {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .upload-btn {
+        font-size: 18px;
+        padding: 4px;
+    }
+
+    .disclaimer {
+        font-size: 10px;
+        margin-top: 6px;
+        color: #333;
+    }
+
+    /* ── File preview ── */
+    .file-preview {
+        border-radius: 14px;
+        padding: 8px 12px;
+        margin-bottom: 6px;
+    }
+
+    .file-preview-inner img {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* ── Code blocks on mobile ── */
+    .bot-bubble pre {
+        font-size: 12px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ── Typing dots ── */
+    .typing-dots span {
+        width: 6px;
+        height: 6px;
+    }
+
+    /* ── Scrollbar hidden on mobile ── */
+    .chat-messages::-webkit-scrollbar {
+        display: none;
+    }
+
+    .sidebar-history::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* ── Hamburger hidden on desktop ── */
+.hamburger {
+    display: none;
+}
+
+/* ── iPhone notch support ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    @media (max-width: 768px) {
+        .input-wrapper {
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        }
+    }
+}
+
+/* ── Small phones (under 380px) ── */
+@media (max-width: 380px) {
+    .bubble {
+        max-width: 88%;
+        font-size: 13px;
+    }
+
+    .message-row {
+        padding: 5px 12px;
+    }
+
+    .welcome h1 {
+        font-size: 18px;
+    }
+
+    .chip {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+
+    .input-wrapper {
+        padding: 8px 10px;
     }
 }
 
