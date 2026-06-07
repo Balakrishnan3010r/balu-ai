@@ -143,8 +143,15 @@ app.post("/api/auth/register", async (req, res) => {
             verifyExpiry: expiry
         });
 
-        await sendVerificationEmail(email, name, code);
-        res.json({ success: true, message: "Verification code sent to your email!", userId: user._id });
+        try {
+            await sendVerificationEmail(email, name, code);
+            console.log("✅ Email sent to:", email);
+            res.json({ success: true, message: "Verification code sent to your email!", userId: user._id });
+        } catch (emailErr) {
+            console.error("❌ Email failed:", emailErr.message);
+            // Still return success so user can proceed
+            res.json({ success: true, message: "Account created! Email may be delayed.", userId: user._id });
+        }
 
     } catch (err) {
         res.status(500).json({ error: err.message });
