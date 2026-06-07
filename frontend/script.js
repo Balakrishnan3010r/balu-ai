@@ -141,7 +141,8 @@ fileInput.addEventListener("change", async (e) => {
 
         if (data.isImage) {
             filePreviewInner.innerHTML = `
-        <img src="http://localhost:3000${data.fileUrl}" alt="preview" />
+        <img src="https://balu-ai.onrender.com
+${data.fileUrl}" alt="preview" />
         <div>
           <div class="file-name">${data.fileName}</div>
           <div class="file-size">Image ready</div>
@@ -184,7 +185,8 @@ function addMessage(text, sender, fileData = null) {
         const attach = document.createElement("div");
         attach.classList.add("file-attachment");
         if (fileData.isImage) {
-            attach.innerHTML = `<img src="http://localhost:3000${fileData.fileUrl}" alt="${fileData.fileName}" />`;
+            attach.innerHTML = `<img src="https://balu-ai.onrender.com
+${fileData.fileUrl}" alt="${fileData.fileName}" />`;
         } else {
             attach.innerHTML = `
         <div class="doc-attachment">
@@ -311,8 +313,10 @@ async function sendMessage() {
         };
 
         if (currentFile.isImage) {
+            https://balu-ai.onrender.com 
+
             try {
-                const imgRes = await window.fetch(`http://localhost:3000${currentFile.fileUrl}`);
+                const imgRes = await window.fetch(`${currentFile.fileUrl}`);
                 const blob = await imgRes.blob();
                 const base64 = await new Promise(resolve => {
                     const reader = new FileReader();
