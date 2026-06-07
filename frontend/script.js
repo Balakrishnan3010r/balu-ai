@@ -27,7 +27,7 @@ newChatBtn?.addEventListener("click", () => {
     if (window.innerWidth <= 768) closeSidebar();
 });
 
-const API_BASE = "http://localhost:3000/api";
+const API_BASE = "https://balu-ai.onrender.com/api";
 const token = localStorage.getItem("token");
 const userName = localStorage.getItem("userName") || "Guest";
 const isLoggedIn = !!token;
