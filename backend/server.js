@@ -81,13 +81,13 @@ const transporter = nodemailer.createTransport({
 
 function sendVerificationEmail(email, name, code) {
     return transporter.sendMail({
-        from: `"Balu AI" <${process.env.EMAIL_USER}>`,
+        from: `"Aura AI" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: "Verify your Balu AI account",
+        subject: "Verify your Aura AI account",
         html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:32px;background:#0f0f0f;color:#e8e8e8;border-radius:16px;">
-        <h2 style="color:#a78bff;">⚡ Balu AI</h2>
-        <p>Hi <strong>${name}</strong>! Welcome to Balu AI.</p>
+        <h2 style="color:#a78bff;">⚡ Aura AI</h2>
+        <p>Hi <strong>${name}</strong>! Welcome to Aura AI.</p>
         <p>Your verification code is:</p>
         <div style="background:#1a1a1a;border:1px solid #6c47ff;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
           <span style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#a78bff;">${code}</span>
@@ -231,7 +231,7 @@ app.post("/api/chat", optionalAuth, async (req, res) => {
         let messages;
         if (fileContext && fileContext.isImage && fileContext.base64) {
             messages = [
-                { role: "system", content: "You are Balu AI, a smart assistant. Analyze images carefully and describe them in clean plain conversational text without unnecessary headers." },
+                { role: "system", content: "You are Aura AI, a smart assistant. Analyze images carefully and describe them in clean plain conversational text without unnecessary headers." },
                 ...history,
                 {
                     role: "user", content: [
@@ -243,7 +243,7 @@ app.post("/api/chat", optionalAuth, async (req, res) => {
         } else {
             messages = [
                 {
-                    role: "system", content: `You are Balu AI, a smart, friendly and professional AI assistant.
+                    role: "system", content: `You are Aura AI, a smart, friendly and professional AI assistant.
 
 FORMATTING RULES:
 - For casual conversation and greetings: use plain text only, no headers
@@ -323,4 +323,4 @@ app.get("/api/sessions", authMiddleware, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Balu AI running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Aura AI running at http://localhost:${PORT}`));
