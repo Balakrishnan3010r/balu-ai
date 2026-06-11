@@ -1,3 +1,6 @@
+
+
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -8,7 +11,7 @@ const multer = require("multer");
 const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+
 
 const app = express();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -45,12 +48,11 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // User Schema
 const userSchema = new mongoose.Schema({
-    name: String,
-    email: { type: String, unique: true },
+    name: { type: String, unique: true },
+    phone: { type: String, unique: true },
     password: String,
-    isVerified: { type: Boolean, default: false },
-    verifyCode: String,
-    verifyExpiry: Date,
+    resetOtp: String,
+    resetOtpExpiry: Date,
     createdAt: { type: Date, default: Date.now }
 });
 const User = mongoose.model("User", userSchema);
@@ -70,33 +72,6 @@ const messageSchema = new mongoose.Schema({
 });
 const Message = mongoose.model("Message", messageSchema);
 
-// ── Email sender ──
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
-
-function sendVerificationEmail(email, name, code) {
-    return transporter.sendMail({
-        from: `"Aura AI" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: "Verify your Aura AI account",
-        html: `
-      <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:32px;background:#0f0f0f;color:#e8e8e8;border-radius:16px;">
-        <h2 style="color:#a78bff;">⚡ Aura AI</h2>
-        <p>Hi <strong>${name}</strong>! Welcome to Aura AI.</p>
-        <p>Your verification code is:</p>
-        <div style="background:#1a1a1a;border:1px solid #6c47ff;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
-          <span style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#a78bff;">${code}</span>
-        </div>
-        <p style="color:#888;font-size:13px;">This code expires in 15 minutes.</p>
-      </div>
-    `
-    });
-}
 
 // ── Auth middleware ──
 function optionalAuth(req, res, next) {
@@ -117,65 +92,36 @@ function authMiddleware(req, res, next) {
     }
 }
 
-// ── Auth Routes ──
+// ── Fast2SMS OTP sender ──
+const axios = require("axios");
+async function sendOTP(phone, otp) {
+    await axios.get("https://www.fast2sms.com/dev/bulkV2", {
+        params: {
+            authorization: process.env.FAST2SMS_API_KEY,
+            variables_values: otp,
+            route: "otp",
+            numbers: phone
+        }
+    });
+}
 
 // Register
 app.post("/api/auth/register", async (req, res) => {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password)
+    const { name, phone, password } = req.body;
+    if (!name || !phone || !password)
         return res.status(400).json({ error: "All fields required" });
-
     if (password.length < 6)
         return res.status(400).json({ error: "Password must be at least 6 characters" });
-
+    if (!/^\d{10}$/.test(phone))
+        return res.status(400).json({ error: "Enter valid 10-digit phone number" });
     try {
-        const exists = await User.findOne({ email });
-        if (exists) return res.status(400).json({ error: "Email already registered" });
+        const exists = await User.findOne({ $or: [{ name }, { phone }] });
+        if (exists) return res.status(400).json({ error: "Username or phone already exists" });
 
         const hashed = await bcrypt.hash(password, 12);
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiry = new Date(Date.now() + 15 * 60 * 1000);
-
-        const user = await User.create({
-            name, email,
-            password: hashed,
-            verifyCode: code,
-            verifyExpiry: expiry
-        });
-
-        try {
-            await sendVerificationEmail(email, name, code);
-            console.log("✅ Email sent to:", email);
-            res.json({ success: true, message: "Verification code sent to your email!", userId: user._id });
-        } catch (emailErr) {
-            console.error("❌ Email failed:", emailErr.message);
-            // Still return success so user can proceed
-            res.json({ success: true, message: "Account created! Email may be delayed.", userId: user._id });
-        }
-
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Verify email
-app.post("/api/auth/verify", async (req, res) => {
-    const { userId, code } = req.body;
-    try {
-        const user = await User.findById(userId);
-        if (!user) return res.status(400).json({ error: "User not found" });
-        if (user.isVerified) return res.status(400).json({ error: "Already verified" });
-        if (user.verifyCode !== code) return res.status(400).json({ error: "Wrong code" });
-        if (new Date() > user.verifyExpiry) return res.status(400).json({ error: "Code expired. Register again." });
-
-        user.isVerified = true;
-        user.verifyCode = null;
-        user.verifyExpiry = null;
-        await user.save();
-
-        const token = jwt.sign({ userId: user._id, name: user.name, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
-        res.json({ success: true, token, name: user.name, email: user.email });
-
+        const user = await User.create({ name, phone, password: hashed });
+        const token = jwt.sign({ userId: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        res.json({ success: true, token, name: user.name });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -183,22 +129,65 @@ app.post("/api/auth/verify", async (req, res) => {
 
 // Login
 app.post("/api/auth/login", async (req, res) => {
-    const { email, password } = req.body;
+    const { name, password } = req.body;
     try {
-        const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ error: "Email not found" });
-        if (!user.isVerified) return res.status(400).json({ error: "Please verify your email first" });
+        const user = await User.findOne({ name });
+        if (!user) return res.status(400).json({ error: "Username not found" });
 
         const match = await bcrypt.compare(password, user.password);
         if (!match) return res.status(400).json({ error: "Wrong password" });
 
-        const token = jwt.sign({ userId: user._id, name: user.name, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
-        res.json({ success: true, token, name: user.name, email: user.email });
-
+        const token = jwt.sign({ userId: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        res.json({ success: true, token, name: user.name });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
+// Forgot Password - Send OTP
+app.post("/api/auth/forgot-password", async (req, res) => {
+    const { phone } = req.body;
+    try {
+        const user = await User.findOne({ phone });
+        if (!user) return res.status(400).json({ error: "Phone number not registered" });
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        user.resetOtp = otp;
+        user.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+        await user.save();
+
+        await sendOTP(phone, otp);
+        res.json({ success: true, message: "OTP sent to your phone" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to send OTP: " + err.message });
+    }
+});
+
+// Reset Password
+app.post("/api/auth/reset-password", async (req, res) => {
+    const { phone, otp, newPassword } = req.body;
+    try {
+        const user = await User.findOne({ phone });
+        if (!user) return res.status(400).json({ error: "Phone not found" });
+        if (user.resetOtp !== otp) return res.status(400).json({ error: "Wrong OTP" });
+        if (new Date() > user.resetOtpExpiry) return res.status(400).json({ error: "OTP expired" });
+        if (newPassword.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
+
+        user.password = await bcrypt.hash(newPassword, 12);
+        user.resetOtp = null;
+        user.resetOtpExpiry = null;
+        await user.save();
+
+        res.json({ success: true, message: "Password reset successful" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+
+
+
 
 // ── File upload ──
 app.post("/api/upload", optionalAuth, upload.single("file"), async (req, res) => {

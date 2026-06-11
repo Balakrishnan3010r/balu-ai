@@ -29,7 +29,6 @@
             padding: 24px;
         }
 
-        /* Logo */
         .logo-wrap {
             text-align: center;
             margin-bottom: 32px;
@@ -60,7 +59,6 @@
             margin-top: 4px;
         }
 
-        /* Card */
         .card {
             background: #2a2a2a;
             border-radius: 16px;
@@ -76,7 +74,6 @@
             text-align: center;
         }
 
-        /* Form */
         .form-group {
             margin-bottom: 14px;
         }
@@ -102,7 +99,6 @@
             border-color: #6c47ff;
         }
 
-        /* Button */
         .btn {
             width: 100%;
             padding: 13px;
@@ -132,36 +128,6 @@
             cursor: not-allowed;
         }
 
-        .btn-outline {
-            background: transparent;
-            color: #ececec;
-            border: 1px solid #3a3a3a;
-        }
-
-        .btn-outline:hover {
-            background: #333;
-        }
-
-        /* Divider */
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 20px 0;
-        }
-
-        .divider-line {
-            flex: 1;
-            height: 1px;
-            background: #333;
-        }
-
-        .divider-text {
-            font-size: 12px;
-            color: #666;
-        }
-
-        /* Switch link */
         .switch-text {
             text-align: center;
             font-size: 14px;
@@ -179,7 +145,6 @@
             text-decoration: underline;
         }
 
-        /* Alert */
         .alert {
             padding: 10px 14px;
             border-radius: 8px;
@@ -200,26 +165,20 @@
             color: #88ff88;
         }
 
-        /* Verify screen */
-        .verify-icon {
-            text-align: center;
-            font-size: 40px;
-            margin-bottom: 12px;
+        .forgot-link {
+            text-align: right;
+            font-size: 13px;
+            color: #a78bff;
+            cursor: pointer;
+            margin-top: -8px;
+            margin-bottom: 10px;
         }
 
-        .verify-info {
-            text-align: center;
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 20px;
-            line-height: 1.6;
+        .forgot-link:hover {
+            text-decoration: underline;
         }
 
-        .verify-info strong {
-            color: #fff;
-        }
-
-        .code-input {
+        .otp-input {
             text-align: center !important;
             font-size: 28px !important;
             font-weight: 700 !important;
@@ -239,7 +198,6 @@
             color: #a78bff;
         }
 
-        /* Loading spinner */
         .spinner {
             display: inline-block;
             width: 16px;
@@ -257,74 +215,46 @@
                 transform: rotate(360deg);
             }
         }
-
-        /* Steps indicator */
-        .steps {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            margin-bottom: 24px;
-        }
-
-        .step-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #333;
-            transition: background 0.3s;
-        }
-
-        .step-dot.active {
-            background: #6c47ff;
-            width: 20px;
-            border-radius: 3px;
-        }
-
-        .step-dot.done {
-            background: #19c37d;
-        }
     </style>
 </head>
 
 <body>
-
     <div class="page">
-        <!-- Logo -->
         <div class="logo-wrap">
             <div class="logo-icon">⚡</div>
             <div class="logo-title">Aura AI</div>
             <div class="logo-sub">Your personal AI assistant</div>
         </div>
 
-        <!-- Alert -->
         <div id="alertBox" class="alert"></div>
 
-        <!-- ── LOGIN SCREEN ── -->
+        <!-- LOGIN -->
         <div id="screenLogin">
             <div class="card">
                 <div class="card-title">Welcome back</div>
                 <div class="form-group">
-                    <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email" />
+                    <input type="text" id="loginName" placeholder="Username" autocomplete="username" />
                 </div>
                 <div class="form-group">
                     <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
                 </div>
-                <button class="btn" id="loginBtn" onclick="login()">Continue</button>
+                <div class="forgot-link" onclick="showScreen('forgot')">Forgot password?</div>
+                <button class="btn" id="loginBtn" onclick="login()">Sign in</button>
             </div>
             <div class="switch-text">
                 Don't have an account? <a href="#" onclick="showScreen('register')">Sign up</a>
             </div>
         </div>
 
-        <!-- ── REGISTER SCREEN ── -->
+        <!-- REGISTER -->
         <div id="screenRegister" style="display:none;">
             <div class="card">
                 <div class="card-title">Create account</div>
                 <div class="form-group">
-                    <input type="text" id="regName" placeholder="Full name" autocomplete="name" />
+                    <input type="text" id="regName" placeholder="Username" autocomplete="username" />
                 </div>
                 <div class="form-group">
-                    <input type="email" id="regEmail" placeholder="Email address" autocomplete="email" />
+                    <input type="tel" id="regPhone" placeholder="Phone number (10 digits)" maxlength="10" />
                 </div>
                 <div class="form-group">
                     <input type="password" id="regPassword" placeholder="Password (min 6 chars)"
@@ -337,38 +267,51 @@
             </div>
         </div>
 
-        <!-- ── VERIFY SCREEN ── -->
-        <div id="screenVerify" style="display:none;">
+        <!-- FORGOT PASSWORD - enter phone -->
+        <div id="screenForgot" style="display:none;">
             <div class="card">
-                <div class="verify-icon">📧</div>
-                <div class="verify-info">
-                    We sent a 6-digit code to<br />
-                    <strong id="verifyEmailLabel"></strong>
-                </div>
+                <div class="card-title">Reset Password</div>
                 <div class="form-group">
-                    <input type="text" id="verifyCode" class="code-input" placeholder="000000" maxlength="6"
-                        oninput="this.value=this.value.replace(/\D/g,'')" />
+                    <input type="tel" id="forgotPhone" placeholder="Registered phone number" maxlength="10" />
                 </div>
-                <button class="btn" id="verifyBtn" onclick="verify()">Verify email</button>
-                <div class="resend" onclick="resendCode()">Resend code</div>
+                <button class="btn" id="forgotBtn" onclick="sendForgotOTP()">Send OTP</button>
             </div>
             <div class="switch-text">
-                Wrong email? <a href="#" onclick="showScreen('register')">Go back</a>
+                <a href="#" onclick="showScreen('login')">Back to login</a>
             </div>
         </div>
 
+        <!-- RESET PASSWORD - enter OTP + new password -->
+        <div id="screenReset" style="display:none;">
+            <div class="card">
+                <div class="card-title">Enter OTP</div>
+                <p style="text-align:center;font-size:13px;color:#888;margin-bottom:20px;">
+                    OTP sent to your phone
+                </p>
+                <div class="form-group">
+                    <input type="text" id="resetOtp" class="otp-input" placeholder="000000" maxlength="6"
+                        oninput="this.value=this.value.replace(/\D/g,'')" />
+                </div>
+                <div class="form-group">
+                    <input type="password" id="resetNewPassword" placeholder="New password (min 6 chars)" />
+                </div>
+                <button class="btn" id="resetBtn" onclick="resetPassword()">Reset Password</button>
+                <div class="resend" onclick="sendForgotOTP()">Resend OTP</div>
+            </div>
+            <div class="switch-text">
+                <a href="#" onclick="showScreen('login')">Back to login</a>
+            </div>
+        </div>
     </div>
 
     <script>
         const API = "https://balu-ai.onrender.com/api";
-        let pendingUserId = null;
-        let pendingEmail = null;
-        let pendingName = null;
-        let pendingPassword = null;
+        let forgotPhone = null;
 
         function showScreen(name) {
-            ["login", "register", "verify"].forEach(s => {
-                document.getElementById("screen" + s.charAt(0).toUpperCase() + s.slice(1)).style.display = "none";
+            ["login", "register", "forgot", "reset"].forEach(s => {
+                const el = document.getElementById("screen" + s.charAt(0).toUpperCase() + s.slice(1));
+                if (el) el.style.display = "none";
             });
             document.getElementById("screen" + name.charAt(0).toUpperCase() + name.slice(1)).style.display = "block";
             hideAlert();
@@ -392,147 +335,137 @@
         }
 
         async function login() {
-            const email = document.getElementById("loginEmail").value.trim();
+            const name = document.getElementById("loginName").value.trim();
             const password = document.getElementById("loginPassword").value;
-            if (!email || !password) return showAlert("Please fill in all fields");
+            if (!name || !password) return showAlert("Please fill in all fields");
 
             setLoading("loginBtn", true, "Signing in...");
             hideAlert();
-
             try {
                 const res = await fetch(`${API}/auth/login`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ name, password })
                 });
                 const data = await res.json();
-
                 if (!res.ok) {
-                    setLoading("loginBtn", false, "Continue");
+                    setLoading("loginBtn", false, "Sign in");
                     return showAlert(data.error);
                 }
-
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("userName", data.name);
-                localStorage.setItem("userEmail", data.email);
-                showAlert("Welcome back, " + data.name + "! Redirecting...", "success");
+                showAlert("Welcome back, " + data.name + "!", "success");
                 setTimeout(() => window.location.href = "/", 1000);
-
             } catch (err) {
-                setLoading("loginBtn", false, "Continue");
-                showAlert("Cannot connect to server. Is it running?");
+                setLoading("loginBtn", false, "Sign in");
+                showAlert("Cannot connect to server.");
             }
         }
 
         async function register() {
             const name = document.getElementById("regName").value.trim();
-            const email = document.getElementById("regEmail").value.trim();
+            const phone = document.getElementById("regPhone").value.trim();
             const password = document.getElementById("regPassword").value;
 
-            if (!name || !email || !password) return showAlert("Please fill in all fields");
+            if (!name || !phone || !password) return showAlert("Please fill in all fields");
             if (password.length < 6) return showAlert("Password must be at least 6 characters");
-            if (!email.includes("@")) return showAlert("Please enter a valid email");
+            if (!/^\d{10}$/.test(phone)) return showAlert("Enter valid 10-digit phone number");
 
             setLoading("registerBtn", true, "Creating account...");
             hideAlert();
-
             try {
                 const res = await fetch(`${API}/auth/register`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name, email, password })
+                    body: JSON.stringify({ name, phone, password })
                 });
                 const data = await res.json();
-
                 if (!res.ok) {
                     setLoading("registerBtn", false, "Create account");
                     return showAlert(data.error);
                 }
-
-                pendingUserId = data.userId;
-                pendingEmail = email;
-                pendingName = name;
-                pendingPassword = password;
-
-                document.getElementById("verifyEmailLabel").textContent = email;
-                showAlert("Code sent! Check your inbox.", "success");
-                setTimeout(() => showScreen("verify"), 800);
-
-            } catch (err) {
-                setLoading("registerBtn", false, "Create account");
-                showAlert("Cannot connect to server. Is it running?");
-            }
-        }
-
-        async function verify() {
-            const code = document.getElementById("verifyCode").value.trim();
-            if (!code || code.length !== 6) return showAlert("Enter the 6-digit code from your email");
-
-            setLoading("verifyBtn", true, "Verifying...");
-            hideAlert();
-
-            try {
-                const res = await fetch(`${API}/auth/verify`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ userId: pendingUserId, code })
-                });
-                const data = await res.json();
-
-                if (!res.ok) {
-                    setLoading("verifyBtn", false, "Verify email");
-                    return showAlert(data.error);
-                }
-
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("userName", data.name);
-                localStorage.setItem("userEmail", data.email);
-                showAlert("✅ Verified! Welcome to Aura AI!", "success");
-                setTimeout(() => window.location.href = "/", 1200);
-
+                showAlert("Account created! Welcome to Aura AI!", "success");
+                setTimeout(() => window.location.href = "/", 1000);
             } catch (err) {
-                setLoading("verifyBtn", false, "Verify email");
+                setLoading("registerBtn", false, "Create account");
                 showAlert("Cannot connect to server.");
             }
         }
 
-        async function resendCode() {
-            if (!pendingEmail) return showAlert("Please register first");
-            showAlert("Sending new code...", "success");
+        async function sendForgotOTP() {
+            const phone = document.getElementById("forgotPhone").value.trim();
+            if (!/^\d{10}$/.test(phone)) return showAlert("Enter valid 10-digit phone number");
+
+            forgotPhone = phone;
+            setLoading("forgotBtn", true, "Sending OTP...");
+            hideAlert();
             try {
-                const res = await fetch(`${API}/auth/register`, {
+                const res = await fetch(`${API}/auth/forgot-password`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: pendingName, email: pendingEmail, password: pendingPassword })
+                    body: JSON.stringify({ phone })
                 });
                 const data = await res.json();
-                pendingUserId = data.userId;
-                showAlert("New code sent! Check your inbox.", "success");
+                if (!res.ok) {
+                    setLoading("forgotBtn", false, "Send OTP");
+                    return showAlert(data.error);
+                }
+                showAlert("OTP sent to your phone!", "success");
+                setTimeout(() => showScreen("reset"), 800);
             } catch (err) {
-                showAlert("Could not resend code.");
+                setLoading("forgotBtn", false, "Send OTP");
+                showAlert("Cannot connect to server.");
+            }
+        }
+
+        async function resetPassword() {
+            const otp = document.getElementById("resetOtp").value.trim();
+            const newPassword = document.getElementById("resetNewPassword").value;
+
+            if (!otp || otp.length !== 6) return showAlert("Enter the 6-digit OTP");
+            if (newPassword.length < 6) return showAlert("Password must be at least 6 characters");
+
+            setLoading("resetBtn", true, "Resetting...");
+            hideAlert();
+            try {
+                const res = await fetch(`${API}/auth/reset-password`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ phone: forgotPhone, otp, newPassword })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    setLoading("resetBtn", false, "Reset Password");
+                    return showAlert(data.error);
+                }
+                showAlert("Password reset successful! Please login.", "success");
+                setTimeout(() => showScreen("login"), 1200);
+            } catch (err) {
+                setLoading("resetBtn", false, "Reset Password");
+                showAlert("Cannot connect to server.");
             }
         }
 
         // Enter key support
         document.addEventListener("keydown", e => {
             if (e.key !== "Enter") return;
-            const login = document.getElementById("screenLogin");
-            const reg = document.getElementById("screenRegister");
-            const ver = document.getElementById("screenVerify");
-            if (login.style.display !== "none") loginFn();
-            else if (reg.style.display !== "none") register();
-            else if (ver.style.display !== "none") verify();
+            const screens = {
+                screenLogin: () => login(),
+                screenRegister: () => register(),
+                screenForgot: () => sendForgotOTP(),
+                screenReset: () => resetPassword()
+            };
+            for (const [id, fn] of Object.entries(screens)) {
+                const el = document.getElementById(id);
+                if (el && el.style.display !== "none") { fn(); break; }
+            }
         });
 
-        // Check if already logged in
-        if (localStorage.getItem("token")) {
-            window.location.href = "/";
-        }
-        // Auto switch to register tab if URL has ?tab=register
+        if (localStorage.getItem("token")) window.location.href = "/";
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get("tab") === "register") {
-            showScreen("register");
-        }
+        if (urlParams.get("tab") === "register") showScreen("register");
     </script>
 </body>
 
