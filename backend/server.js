@@ -1,4 +1,6 @@
-
+const passport = require("passport");
+const session = require("express-session");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 
 require("dotenv").config();
@@ -21,6 +23,39 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json({ limit: "20mb" }));
+app.use(session({
+    secret: process.env.JWT_SECRET,
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
+
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: process.env.NODE_ENV === "production"
+        ? "https://balu-ai.onrender.com/api/auth/google/callback"
+        : "http://localhost:3000/api/auth/google/callback"
+}, async (accessToken, refreshToken, profile, done) => {
+    try {
+        let user = await User.findOne({ googleId: profile.id });
+        if (!user) {
+            user = await User.create({
+                name: profile.displayName,
+                googleId: profile.id,
+                avatar: profile.photos[0]?.value
+            });
+        }
+        const token = jwt.sign({ userId: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        done(null, { token, name: user.name });
+    } catch (err) {
+        done(err, null);
+    }
+}));
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 // ── Uploads ──
@@ -49,8 +84,10 @@ mongoose.connect(process.env.MONGODB_URI)
 // User Schema
 const userSchema = new mongoose.Schema({
     name: { type: String, unique: true },
-    phone: { type: String, unique: true },
+    phone: { type: String, unique: true, sparse: true },
     password: String,
+    googleId: { type: String, unique: true, sparse: true },
+    avatar: String,
     resetOtp: String,
     resetOtpExpiry: Date,
     createdAt: { type: Date, default: Date.now }
@@ -94,7 +131,10 @@ function authMiddleware(req, res, next) {
 
 // ── Fast2SMS OTP sender ──
 const axios = require("axios");
+
 async function sendOTP(phone, otp) {
+
+    console.log("API KEY:", process.env.FAST2SMS_API_KEY); // add this line
     await axios.post("https://www.fast2sms.com/dev/bulkV2", {
         variables_values: otp,
         route: "otp",
@@ -185,6 +225,18 @@ app.post("/api/auth/reset-password", async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+// Google OAuth routes
+app.get("/api/auth/google",
+    passport.authenticate("google", { scope: ["profile"] })
+);
+
+app.get("/api/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/auth.html" }),
+    (req, res) => {
+        const { token, name } = req.user;
+        res.redirect(`/auth.html?token=${token}&name=${encodeURIComponent(name)}`);
+    }
+);
 
 
 
