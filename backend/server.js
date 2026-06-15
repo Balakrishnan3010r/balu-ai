@@ -44,8 +44,11 @@ passport.use(new GoogleStrategy({
     try {
         let user = await User.findOne({ googleId: profile.id });
         if (!user) {
+            // Generate unique username from Google profile
+            const baseName = profile.displayName.replace(/\s+/g, "_").slice(0, 20);
+            const uniqueName = baseName + "_" + Math.floor(1000 + Math.random() * 9000);
             user = await User.create({
-                name: profile.displayName,
+                name: uniqueName,
                 googleId: profile.id,
                 avatar: profile.photos[0]?.value
             });
@@ -53,6 +56,7 @@ passport.use(new GoogleStrategy({
         const token = jwt.sign({ userId: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "7d" });
         done(null, { token, name: user.name });
     } catch (err) {
+        console.error("Google OAuth error:", err.message);
         done(err, null);
     }
 }));
