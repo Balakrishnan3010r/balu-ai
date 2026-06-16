@@ -89,7 +89,6 @@ mongoose.connect(process.env.MONGODB_URI)
 const userSchema = new mongoose.Schema({
     name: { type: String, unique: true },
     email: { type: String, unique: true, sparse: true },
-    phone: { type: String, unique: true, sparse: true },
     password: String,
     googleId: { type: String, unique: true, sparse: true },
     avatar: String,
@@ -183,9 +182,9 @@ async function sendOTP(phone, otp) {
 }
 // Register
 app.post("/api/auth/register", async (req, res) => {
-    const { name, email, phone, password } = req.body;
+    const { name, email, password } = req.body;
     if (!name || !email || !password)
-        return res.status(400).json({ error: "Name, email and password are required" });
+        return res.status(400).json({ error: "All fields required" });
     if (password.length < 6)
         return res.status(400).json({ error: "Password must be at least 6 characters" });
     if (!email.includes("@"))
@@ -195,7 +194,7 @@ app.post("/api/auth/register", async (req, res) => {
         if (exists) return res.status(400).json({ error: "Username or email already exists" });
 
         const hashed = await bcrypt.hash(password, 12);
-        const user = await User.create({ name, email, phone: phone || null, password: hashed });
+        const user = await User.create({ name, email, password: hashed });
         const token = jwt.sign({ userId: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "7d" });
         res.json({ success: true, token, name: user.name });
     } catch (err) {

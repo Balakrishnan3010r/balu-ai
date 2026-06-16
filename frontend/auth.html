@@ -338,9 +338,7 @@
                 <div class="form-group">
                     <input type="email" id="regEmail" placeholder="Email address" />
                 </div>
-                <div class="form-group">
-                    <input type="tel" id="regPhone" placeholder="Phone number (optional)" maxlength="10" />
-                </div>
+
                 <div class="form-group">
                     <input type="password" id="regPassword" placeholder="Password (min 6 chars)"
                         autocomplete="new-password" />
@@ -451,7 +449,6 @@
         async function register() {
             const name = document.getElementById("regName").value.trim();
             const email = document.getElementById("regEmail").value.trim();
-            const phone = document.getElementById("regPhone").value.trim();
             const password = document.getElementById("regPassword").value;
 
             if (!name || !email || !password) return showAlert("Please fill in all fields");
@@ -464,7 +461,7 @@
                 const res = await fetch(`${API}/auth/register`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name, email, phone, password })
+                    body: JSON.stringify({ name, email, password })
                 });
                 const data = await res.json();
                 if (!res.ok) {
@@ -480,7 +477,6 @@
                 showAlert("Cannot connect to server.");
             }
         }
-
         async function sendForgotOTP() {
             const email = document.getElementById("forgotEmail").value.trim();
             if (!email || !email.includes("@")) return showAlert("Enter valid email address");
