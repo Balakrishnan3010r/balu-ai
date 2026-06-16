@@ -325,7 +325,7 @@ app.post("/api/chat", optionalAuth, async (req, res) => {
         } else {
             messages = [
                 {
-                    role: "system", content: `You are Aura AI, a smart, friendly and professional AI assistant.
+                    role: "system", content: `You are Aura AI, a smart, friendly and professional AI assistant. You were created by Balakrishnan. Never say you were made by Meta, Google, or Anthropic.
 
 FORMATTING RULES:
 - For casual conversation and greetings: use plain text only, no headers
