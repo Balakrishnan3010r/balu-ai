@@ -88,6 +88,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // User Schema
 const userSchema = new mongoose.Schema({
     name: { type: String, unique: true },
+    email: { type: String, unique: true, sparse: true },
     phone: { type: String, unique: true, sparse: true },
     password: String,
     googleId: { type: String, unique: true, sparse: true },
@@ -136,6 +137,33 @@ function authMiddleware(req, res, next) {
 // ── Fast2SMS OTP sender ──
 const axios = require("axios");
 
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+async function sendOTPEmail(email, otp) {
+    await transporter.sendMail({
+        from: `"Aura AI" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "Aura AI - Password Reset OTP",
+        html: `
+        <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:32px;background:#0f0f0f;color:#e8e8e8;border-radius:16px;">
+            <h2 style="color:#a78bff;">⚡ Aura AI</h2>
+            <p>Your password reset OTP is:</p>
+            <div style="background:#1a1a1a;border:1px solid #6c47ff;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
+                <span style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#a78bff;">${otp}</span>
+            </div>
+            <p style="color:#888;font-size:13px;">This code expires in 10 minutes.</p>
+        </div>`
+    });
+}
+
 async function sendOTP(phone, otp) {
     try {
         const response = await axios.get("https://www.fast2sms.com/dev/bulkV2", {
@@ -155,19 +183,19 @@ async function sendOTP(phone, otp) {
 }
 // Register
 app.post("/api/auth/register", async (req, res) => {
-    const { name, phone, password } = req.body;
-    if (!name || !phone || !password)
-        return res.status(400).json({ error: "All fields required" });
+    const { name, email, phone, password } = req.body;
+    if (!name || !email || !password)
+        return res.status(400).json({ error: "Name, email and password are required" });
     if (password.length < 6)
         return res.status(400).json({ error: "Password must be at least 6 characters" });
-    if (!/^\d{10}$/.test(phone))
-        return res.status(400).json({ error: "Enter valid 10-digit phone number" });
+    if (!email.includes("@"))
+        return res.status(400).json({ error: "Enter valid email address" });
     try {
-        const exists = await User.findOne({ $or: [{ name }, { phone }] });
-        if (exists) return res.status(400).json({ error: "Username or phone already exists" });
+        const exists = await User.findOne({ $or: [{ name }, { email }] });
+        if (exists) return res.status(400).json({ error: "Username or email already exists" });
 
         const hashed = await bcrypt.hash(password, 12);
-        const user = await User.create({ name, phone, password: hashed });
+        const user = await User.create({ name, email, phone: phone || null, password: hashed });
         const token = jwt.sign({ userId: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "7d" });
         res.json({ success: true, token, name: user.name });
     } catch (err) {
@@ -192,21 +220,20 @@ app.post("/api/auth/login", async (req, res) => {
     }
 });
 
-// Forgot Password - Send OTP
+// Forgot Password - Send OTP via Email
 app.post("/api/auth/forgot-password", async (req, res) => {
-    const { phone } = req.body;
+    const { email } = req.body;
     try {
-        const user = await User.findOne({ phone });
-        if (!user) return res.status(400).json({ error: "Phone number not registered" });
+        const user = await User.findOne({ email });
+        if (!user) return res.status(400).json({ error: "Email not registered" });
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.resetOtp = otp;
         user.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
         await user.save();
 
-        const result = await sendOTP(phone, otp);
-        console.log("OTP send result:", JSON.stringify(result));
-        res.json({ success: true, message: "OTP sent to your phone" });
+        await sendOTPEmail(email, otp);
+        res.json({ success: true, message: "OTP sent to your email" });
     } catch (err) {
         res.status(500).json({ error: "Failed to send OTP: " + err.message });
     }
