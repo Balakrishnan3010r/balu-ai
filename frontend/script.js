@@ -182,20 +182,19 @@ function addMessage(text, sender, fileData = null) {
     }
 
     const bubble = document.createElement("div");
-    bubble.classList.add("bubble", sender === "user" ? "user-bubble" : "bot-bubble");
+    bubble.classList.add(sender === "user" ? "user-bubble" : "bot-bubble");
 
     if (fileData) {
         const attach = document.createElement("div");
         attach.classList.add("file-attachment");
         if (fileData.isImage) {
-            attach.innerHTML = `<img src="https://balu-ai.onrender.com
-${fileData.fileUrl}" alt="${fileData.fileName}" />`;
+            attach.innerHTML = `<img src="https://balu-ai.onrender.com${fileData.fileUrl}" alt="${fileData.fileName}" />`;
         } else {
             attach.innerHTML = `
-        <div class="doc-attachment">
-          <span>${fileData.fileType === "application/pdf" ? "📄" : "📝"}</span>
-          <span>${fileData.fileName}</span>
-        </div>`;
+            <div class="doc-attachment">
+                <span>${fileData.fileType === "application/pdf" ? "📄" : "📝"}</span>
+                <span>${fileData.fileName}</span>
+            </div>`;
         }
         bubble.appendChild(attach);
     }
@@ -208,7 +207,6 @@ ${fileData.fileUrl}" alt="${fileData.fileName}" />`;
     }
     bubble.appendChild(textEl);
 
-    row.appendChild(avatar);
     row.appendChild(bubble);
     chatMessages.appendChild(row);
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -221,11 +219,11 @@ function showTyping() {
     row.id = "typingRow";
 
     const avatar = document.createElement("div");
-    avatar.classList.add("avatar", "bot-avatar");
+    avatar.classList.add("bot-avatar");
     avatar.textContent = "⚡";
 
     const bubble = document.createElement("div");
-    bubble.classList.add("bubble", "bot-bubble");
+    bubble.classList.add("bot-bubble");
     bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
 
     row.appendChild(avatar);
@@ -373,10 +371,10 @@ async function sendMessage() {
         const row = document.createElement("div");
         row.classList.add("message-row", "bot");
         const avatar = document.createElement("div");
-        avatar.classList.add("avatar", "bot-avatar");
+        avatar.classList.add("bot-avatar");
         avatar.textContent = "⚡";
         const bubble = document.createElement("div");
-        bubble.classList.add("bubble", "bot-bubble");
+        bubble.classList.add("bot-bubble");
         row.appendChild(avatar);
         row.appendChild(bubble);
         chatMessages.appendChild(row);
