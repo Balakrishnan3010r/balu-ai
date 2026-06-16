@@ -449,6 +449,7 @@
         }
 
         async function register() {
+            const name = document.getElementById("regName").value.trim();
             const email = document.getElementById("regEmail").value.trim();
             const phone = document.getElementById("regPhone").value.trim();
             if (!name || !email || !password) return showAlert("Please fill in all fields");
