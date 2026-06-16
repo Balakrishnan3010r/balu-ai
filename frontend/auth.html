@@ -336,7 +336,10 @@
                     <input type="text" id="regName" placeholder="Username" autocomplete="username" />
                 </div>
                 <div class="form-group">
-                    <input type="tel" id="regPhone" placeholder="Phone number (10 digits)" maxlength="10" />
+                    <input type="email" id="regEmail" placeholder="Email address" />
+                </div>
+                <div class="form-group">
+                    <input type="tel" id="regPhone" placeholder="Phone number (optional)" maxlength="10" />
                 </div>
                 <div class="form-group">
                     <input type="password" id="regPassword" placeholder="Password (min 6 chars)"
@@ -354,7 +357,7 @@
             <div class="card">
                 <div class="card-title">Reset Password</div>
                 <div class="form-group">
-                    <input type="tel" id="forgotPhone" placeholder="Registered phone number" maxlength="10" />
+                    <input type="email" id="forgotEmail" placeholder="Enter your email address" />
                 </div>
                 <button class="btn" id="forgotBtn" onclick="sendForgotOTP()">Send OTP</button>
             </div>
@@ -446,13 +449,11 @@
         }
 
         async function register() {
-            const name = document.getElementById("regName").value.trim();
+            const email = document.getElementById("regEmail").value.trim();
             const phone = document.getElementById("regPhone").value.trim();
-            const password = document.getElementById("regPassword").value;
-
-            if (!name || !phone || !password) return showAlert("Please fill in all fields");
+            if (!name || !email || !password) return showAlert("Please fill in all fields");
             if (password.length < 6) return showAlert("Password must be at least 6 characters");
-            if (!/^\d{10}$/.test(phone)) return showAlert("Enter valid 10-digit phone number");
+            if (!email.includes("@")) return showAlert("Enter valid email address");
 
             setLoading("registerBtn", true, "Creating account...");
             hideAlert();
@@ -460,7 +461,7 @@
                 const res = await fetch(`${API}/auth/register`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name, phone, password })
+                    body: JSON.stringify({ name, email, phone, password })
                 });
                 const data = await res.json();
                 if (!res.ok) {
@@ -478,17 +479,17 @@
         }
 
         async function sendForgotOTP() {
-            const phone = document.getElementById("forgotPhone").value.trim();
-            if (!/^\d{10}$/.test(phone)) return showAlert("Enter valid 10-digit phone number");
+            const email = document.getElementById("forgotEmail").value.trim();
+            if (!email || !email.includes("@")) return showAlert("Enter valid email address");
 
-            forgotPhone = phone;
+            forgotPhone = email;
             setLoading("forgotBtn", true, "Sending OTP...");
             hideAlert();
             try {
                 const res = await fetch(`${API}/auth/forgot-password`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ phone })
+                    body: JSON.stringify({ email })
                 });
                 const data = await res.json();
                 if (!res.ok) {
