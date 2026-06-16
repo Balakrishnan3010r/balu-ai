@@ -146,13 +146,13 @@ async function sendOTP(phone, otp) {
                 numbers: phone
             }
         });
-        console.log("Fast2SMS response:", response.data);
+        console.log("Fast2SMS response:", JSON.stringify(response.data));
+        return response.data;
     } catch (err) {
-        console.error("Fast2SMS error:", err.response?.data);
-        throw err;
+        console.error("Fast2SMS full error:", JSON.stringify(err.response?.data));
+        throw new Error(JSON.stringify(err.response?.data));
     }
 }
-
 // Register
 app.post("/api/auth/register", async (req, res) => {
     const { name, phone, password } = req.body;
@@ -204,7 +204,8 @@ app.post("/api/auth/forgot-password", async (req, res) => {
         user.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
         await user.save();
 
-        await sendOTP(phone, otp);
+        const result = await sendOTP(phone, otp);
+        console.log("OTP send result:", JSON.stringify(result));
         res.json({ success: true, message: "OTP sent to your phone" });
     } catch (err) {
         res.status(500).json({ error: "Failed to send OTP: " + err.message });
