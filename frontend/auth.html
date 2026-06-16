@@ -452,6 +452,8 @@
             const name = document.getElementById("regName").value.trim();
             const email = document.getElementById("regEmail").value.trim();
             const phone = document.getElementById("regPhone").value.trim();
+            const password = document.getElementById("regPassword").value;
+
             if (!name || !email || !password) return showAlert("Please fill in all fields");
             if (password.length < 6) return showAlert("Password must be at least 6 characters");
             if (!email.includes("@")) return showAlert("Enter valid email address");
