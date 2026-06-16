@@ -174,12 +174,6 @@ function addMessage(text, sender, fileData = null) {
     const row = document.createElement("div");
     row.classList.add("message-row", sender);
 
-    if (sender === "bot") {
-        const avatar = document.createElement("div");
-        avatar.classList.add("bot-avatar");
-        avatar.textContent = "⚡";
-        row.appendChild(avatar);
-    }
 
     const bubble = document.createElement("div");
     bubble.classList.add(sender === "user" ? "user-bubble" : "bot-bubble");
