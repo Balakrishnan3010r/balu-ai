@@ -286,6 +286,21 @@ function useChip(el) {
     userInput.value = el.textContent;
     sendMessage();
 }
+async function typewriterEffect(element, fullText) {
+    element.innerHTML = renderMarkdown(fullText);
+    const chars = element.innerText.length;
+    element.style.opacity = "1";
+}
+
+let typewriterQueue = [];
+let isTyping = false;
+
+async function typewriterEffect(bubble, fullText) {
+    return new Promise((resolve) => {
+        bubble.innerHTML = renderMarkdown(fullText);
+        resolve();
+    });
+}
 
 // ── Send message ──
 async function sendMessage() {
@@ -383,9 +398,13 @@ async function sendMessage() {
                     try {
                         const parsed = JSON.parse(data);
                         if (parsed.content) {
-                            fullReply += parsed.content;
-                            bubble.innerHTML = renderMarkdown(fullReply);
-                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                            // Typewriter: add one character at a time
+                            for (const char of parsed.content) {
+                                fullReply += char;
+                                bubble.innerHTML = renderMarkdown(fullReply);
+                                chatMessages.scrollTop = chatMessages.scrollHeight;
+                                await new Promise(r => setTimeout(r, 18));
+                            }
                         }
                     } catch { }
                 }
