@@ -137,14 +137,20 @@ function authMiddleware(req, res, next) {
 const axios = require("axios");
 
 async function sendOTP(phone, otp) {
-    await axios.get("https://www.fast2sms.com/dev/bulkV2", {
-        params: {
-            authorization: process.env.FAST2SMS_API_KEY,
-            variables_values: otp,
-            route: "otp",
-            numbers: phone
-        }
-    });
+    try {
+        const response = await axios.get("https://www.fast2sms.com/dev/bulkV2", {
+            params: {
+                authorization: process.env.FAST2SMS_API_KEY,
+                variables_values: otp,
+                route: "otp",
+                numbers: phone
+            }
+        });
+        console.log("Fast2SMS response:", response.data);
+    } catch (err) {
+        console.error("Fast2SMS error:", err.response?.data);
+        throw err;
+    }
 }
 
 // Register
