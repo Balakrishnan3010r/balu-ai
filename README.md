@@ -1,4 +1,4 @@
-# ⚡ Balu AI — Full Stack AI Chatbot
+# ⚡ Aura AI — Full Stack AI Chatbot
 
 A professional AI chatbot web application built from scratch, inspired by ChatGPT.
 
