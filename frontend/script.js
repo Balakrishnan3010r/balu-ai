@@ -1,7 +1,12 @@
 // ── Mobile sidebar toggle ──
 const hamburgerBtn = document.getElementById("hamburgerBtn");
+const hamburgerBtn2 = document.getElementById("hamburgerBtn2");
 const sidebarEl = document.querySelector(".sidebar");
 const overlayEl = document.getElementById("sidebarOverlay");
+
+function isMobile() {
+    return window.innerWidth <= 768;
+}
 
 function openSidebar() {
     sidebarEl.classList.add("open");
@@ -13,9 +18,16 @@ function closeSidebar() {
     overlayEl.classList.remove("show");
 }
 
-hamburgerBtn?.addEventListener("click", () => {
-    sidebarEl.classList.contains("open") ? closeSidebar() : openSidebar();
-});
+function toggleSidebar() {
+    if (isMobile()) {
+        sidebarEl.classList.contains("open") ? closeSidebar() : openSidebar();
+    } else {
+        sidebarEl.classList.toggle("collapsed");
+    }
+}
+
+hamburgerBtn?.addEventListener("click", toggleSidebar);
+hamburgerBtn2?.addEventListener("click", toggleSidebar);
 
 overlayEl?.addEventListener("click", closeSidebar);
 

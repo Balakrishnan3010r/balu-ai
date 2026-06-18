@@ -27,6 +27,23 @@ body {
     padding: 10px 8px;
     flex-shrink: 0;
     height: 100vh;
+    transition: width 0.2s ease;
+    overflow: hidden;
+}
+
+.sidebar.collapsed {
+    width: 60px;
+}
+
+.sidebar.collapsed .history-label,
+.sidebar.collapsed .history-item,
+.sidebar.collapsed .sidebar-footer {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-top {
+    flex-direction: column;
+    gap: 8px;
 }
 
 .sidebar-top {
